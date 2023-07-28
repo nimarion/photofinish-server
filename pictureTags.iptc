@@ -1,0 +1,100 @@
+;OSV-Star software. Configuration file for photofinish tagging.
+;This configuration file allows to dynamically choose which IPTC tags
+;will be filled, with static text or dynamic text (race variables).
+;use semi-column ';' to separate fields.
+;
+;	1. IPTC fields used: 
+;
+;	Caption :			Full description of picture.	2000 signs
+;					Use for ranking.
+;	CaptionWriter:			writer who wrote the caption	64 signs
+;	Keywords:			e.g. Sport			64 signs/line
+;	Credit: 			Timekeeping team.		32 signs
+;	Copyright:			Timekeeping team, rights	128 signs
+;	ObjectName:			ID of picture.			64 signs
+;	Datum:				Date of acquisition.		yyyymmdd
+;	City:				City where acquired.		32 signs
+;	Sublocation:			Additional data about city.	32 signs
+;	Province:			Province where acquired.	32 signs
+;	Country:			Country where acquired.		64 signs
+;	Byline:				Name of who made pic.		64 signs
+;						see copyright.
+;	BylineTitle: 			Title that goes to this pers.	64 signs
+;	Category:			previously ANPA code.		64 signs
+;	SpecialInstructions:		distribution/restrictions.	256 signs
+;	Headline:			Synopsis of the subject matter.	256 signs
+;	Source:				Timekeeping team.
+;	OriginalTransRef:		original JobID.			64 signs
+;
+;
+;	2. Available variables: 
+;
+;	Race parameters
+;		$Title1, $Title2, $Distance, $WindSpeed, $StartTime, $Sponsor, 
+;		$Location1, $Location2, $Location3,$XRatio, $RaceID, $CameraDir
+;		$Sport, $Datum, $RSC, $Version, $Revision
+;
+;	OIN4 fields
+;		$OIN4Event, $OIN4Series, $OIN4Dist, $OIN4Cat, 
+;
+;
+;	Ranking: 
+;		The following fields compose the internal variable $Ranking:
+;
+;		$Rank, $Lane, $Bib, $FirstName, $LastName, $Name, 
+;		$Nation, $Time, $ReactTime
+;
+;		Format the $Ranking variable as follows:
+;		-> e.g. $Ranking = $Rank $Lane $Name $Time [1-9]
+;		-> note that the range [1-9] specification is mandatory.
+;
+;		Choose a separator for the ranking fields:
+;		-> e.g. $Separator = [;] <- allows CSV parsing style.
+;
+;		The $Ranking variable is to be used in the IPTC_CAPTION field.
+;		see further examples below.
+;
+;
+;
+;	3. Examples
+;
+;	Example1 : IPTC_CAPTION=$Ranking WindSpeed: $WindSpeed
+;	->The $Ranking will be included as a multiline packet.
+;	->Other text/variables can be included before/after $Ranking.
+;
+;	Example2 : IPTC_Credit=$Sponsor
+;	Example3 : IPTC_Keywords=Photofinish;$Sport
+;
+;
+;	4. Conditional expressions
+;
+;	Example 4 : IF($WindSpeed){Wind speed : $WindSpeed}
+;	-> choose one variable only if it's non null.
+;
+;	Example 5 : IF($RaceID){$RaceID}ELSE{$RSC}
+;	-> choose another variable if the first is null.
+;
+;Copyright Swiss Timing Ltd. 2011-2013
+
+
+[IPTC]
+$Separator=[;]
+$Ranking=$Rank $Bib $Lane $LastName $FirstName $Nation $Time $ReactTime[1-9]
+IPTC_CaptionWriter=OMEGA Scan'O'Vision Photofinish Camera
+IPTC_Caption=Rank;Bib;Lane;LastName;FirstName;Nat;Time;React.Time;IF($WindSpeed){Windspeed;}$RankingIF($WindSpeed){;;;;;;;;$WindSpeed;}
+IPTC_Keywords=Photofinish
+IPTC_Credit=$Sponsor
+IPTC_Copyright=$Sponsor
+IPTC_ObjectName=$Title1
+IPTC_Datum=$Datum
+IPTC_City=$Location1
+IPTC_Province=$Location3
+IPTC_Country=
+IPTC_Sublocation=$Location2
+IPTC_BylineTitle=
+IPTC_Byline=
+IPTC_OriginalTransRef=v$Version.$Revision
+IPTC_SpecialInstructions=
+IPTC_Category=
+IPTC_Headline=$StartTime
+IPTC_Source=

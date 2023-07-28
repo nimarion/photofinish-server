@@ -1,0 +1,12 @@
+@font-face {
+    font-family: "wa-bold";
+    src: url("/fonts/WorldAthletics-Bold.otf") format("opentype");
+  }
+  @font-face {
+    font-family: "wa-regular";
+    src: url("/fonts/WorldAthletics-Regular.otf") format("opentype");
+  }
+  @font-face {
+    font-family: "wa-headline";
+    src: url("/fonts/WorldAthleticsHeadline.otf") format("opentype");
+  }

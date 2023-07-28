@@ -1,16 +1,17 @@
-name: Create and publish a Docker image
+name: 🚀 Deploy
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - dev
+      - develop
       - main
     tags:
       - "*"
 permissions:
   actions: write
   contents: read
+  packages: write
 
 env:
   REGISTRY: ghcr.io
@@ -60,7 +61,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            COMMIT_SHA=${{ github.sha }}
+            COMMIT=${{ github.sha }}
+            BRANCH=${{ github.head_ref || github.ref_name }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
 
@@ -68,15 +70,3 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-  deploy:
-    name: 🚀 Deploy
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-
-    steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
-
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v3
