@@ -1,49 +1,60 @@
 import fs from "fs";
 import path from "path";
 import exifr from "exifr";
-import { LoaderArgs, json } from "@remix-run/node";
+import type { LoaderArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import ContentContainer from "~/components/ContentContainer";
 import Title from "~/components/Title";
+import csv from "csvtojson";
 
 export const loader = async ({ params }: LoaderArgs) => {
   const IMAGE_FOLDER = path.join(process.cwd(), "public", "images");
   const competitionId = params.id;
   if (!competitionId) {
     throw new Response(null, {
-        status: 404,
-        statusText: "Not Found",
-      });
+      status: 404,
+      statusText: "Not Found",
+    });
   }
   if (!fs.existsSync(path.join(IMAGE_FOLDER, competitionId))) {
     throw new Response(null, {
-        status: 404,
-        statusText: "Not Found",
-      });
+      status: 404,
+      statusText: "Not Found",
+    });
   }
   const files = fs
     .readdirSync(path.join(IMAGE_FOLDER, competitionId))
     .filter((file) => {
       return file != "thumbnail.jpg";
     });
-  const images = await Promise.all(files.map(async (file) => {
-    const data = fs.readFileSync("public/images/" + competitionId + "/" + file);
-    const output = await exifr.parse(data, { iptc: true });
-    const url = "/images/" + competitionId + "/" + file;
-    const title = output.ObjectName || "";
-    const timestamp = output.Headline || 0;
-    return {
-      title,
-      timestamp,
-      url,
-    };
-  }));
+  const images = await Promise.all(
+    files.map(async (file) => {
+      const data = fs.readFileSync(
+        "public/images/" + competitionId + "/" + file
+      );
+      const output = await exifr.parse(data, { iptc: true });
+      const url = "/images/" + competitionId + "/" + file;
+      const title = output.ObjectName || "";
+      const timestamp = output.Headline || 0;
+      const names = await csv({
+        delimiter: ";",
+      }).fromString(output.Caption).then((jsonObj) => {
+        return jsonObj.map((item) => {
+          return item.FirstName + " " + item.LastName;
+        }).filter((item) => {
+          return item.trim() != "";
+        });
+      })
+      return { title, timestamp, url, names };
+    })
+  );
   const title = competitionId.slice(0, -9);
   return json({ title, images });
 };
 
 export default function Index() {
-  const { title, images} = useLoaderData<typeof loader>();
+  const { title, images } = useLoaderData<typeof loader>();
   return (
     <ContentContainer>
       <Title>{title}</Title>
@@ -72,6 +83,7 @@ export default function Index() {
                     </span>
                   </div>
                   <h3 className="font-wa-headline text-xl">{image.title}</h3>
+                  <p className="text-gray-500"> {image.names.join(", ")}</p>
                 </div>
               </a>
             </li>
