@@ -81,6 +81,9 @@ export default function Index() {
           alt={image.title}
           className="w-full rounded-t-md"
         />
+        <div className="ml-4 flex flex-1 flex-col justify-between gap-4 py-4 ">
+          <h3 className="font-wa-headline text-xl">{image.title}</h3>
+        </div>
       </ReactModal>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {images
@@ -93,7 +96,6 @@ export default function Index() {
               className="rounded-md bg-white flex flex-col"
               key={key}
               onClick={() => {
-                console.log(image);
                 setImage({
                   url: image.url,
                   title: image.title,
@@ -114,7 +116,12 @@ export default function Index() {
               <div className="ml-4 flex flex-1 flex-col justify-between gap-4 py-4 ">
                 <div className="flex items-center">
                   <span className="block text-sm text-gray-400">
-                    {image.timestamp}
+                    {new Date(
+                      `1970-01-01T${image.timestamp}Z`
+                    ).toLocaleTimeString("de-DE", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </span>
                 </div>
                 <h3 className="font-wa-headline text-xl">{image.title}</h3>
