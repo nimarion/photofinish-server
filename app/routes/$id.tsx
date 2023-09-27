@@ -1,14 +1,14 @@
 import fs from "fs";
 import path from "path";
 import exifr from "exifr";
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs} from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import ContentContainer from "~/components/ContentContainer";
 import Title from "~/components/Title";
 import csv from "csvtojson";
 
-export const loader = async ({ params }: LoaderArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   const IMAGE_FOLDER = path.join(process.cwd(), "public", "images");
   const competitionId = params.id;
   if (!competitionId) {

@@ -5,7 +5,6 @@ function OutsideClickHandler({ children, onOutsideClick = () => {} }: any) {
 
   useEffect(() => {
     function handleClickOutside(event: any) {
-        wrapperRef.current
       if (
         wrapperRef.current &&
         !wrapperRef.current.contains(event.target)
