@@ -1,12 +1,14 @@
 import fs from "fs";
 import path from "path";
 import exifr from "exifr";
-import type { LoaderFunctionArgs} from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import ContentContainer from "~/components/ContentContainer";
 import Title from "~/components/Title";
 import csv from "csvtojson";
+import ReactModal from "react-modal";
+import React, { useEffect } from "react";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const IMAGE_FOLDER = path.join(process.cwd(), "public", "images");
@@ -39,13 +41,17 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
       const timestamp = output.Headline || 0;
       const names = await csv({
         delimiter: ";",
-      }).fromString(output.Caption).then((jsonObj) => {
-        return jsonObj.map((item) => {
-          return item.FirstName + " " + item.LastName;
-        }).filter((item) => {
-          return item.trim() != "";
-        });
       })
+        .fromString(output.Caption)
+        .then((jsonObj) => {
+          return jsonObj
+            .map((item) => {
+              return item.FirstName + " " + item.LastName;
+            })
+            .filter((item) => {
+              return item.trim() != "";
+            });
+        });
       return { title, timestamp, url, names };
     })
   );
@@ -55,9 +61,27 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export default function Index() {
   const { title, images } = useLoaderData<typeof loader>();
+  const [image, setImage] = React.useState({ url: "", title: "", names: [""] });
+  const [open, setOpen] = React.useState(false);
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [open]);
   return (
     <ContentContainer>
       <Title>{title}</Title>
+      <ReactModal isOpen={open} onRequestClose={() => setOpen(false)}>
+        <img
+          src={image.url}
+          width={1920}
+          height={1080}
+          alt={image.title}
+          className="w-full rounded-t-md"
+        />
+      </ReactModal>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {images
           .filter((image) => image.title != "")
@@ -65,27 +89,37 @@ export default function Index() {
             a.timestamp < b.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0
           )
           .map((image, key) => (
-            <li className="rounded-md bg-white" key={key}>
-              <a href={image.url}>
-                <div className="aspect-h-9 aspect-w-16">
-                  <img
-                    src={image.url}
-                    width={1920}
-                    height={1080}
-                    alt={image.title}
-                    className="w-full rounded-t-md"
-                  />
+            <li
+              className="rounded-md bg-white flex flex-col"
+              key={key}
+              onClick={() => {
+                console.log(image);
+                setImage({
+                  url: image.url,
+                  title: image.title,
+                  names: image.names,
+                });
+                setOpen(true);
+              }}
+            >
+              <div className="aspect-h-9 aspect-w-16">
+                <img
+                  src={image.url}
+                  width={1920}
+                  height={1080}
+                  alt={image.title}
+                  className="w-full rounded-t-md"
+                />
+              </div>
+              <div className="ml-4 flex flex-1 flex-col justify-between gap-4 py-4 ">
+                <div className="flex items-center">
+                  <span className="block text-sm text-gray-400">
+                    {image.timestamp}
+                  </span>
                 </div>
-                <div className="ml-4 flex flex-1 flex-col justify-between gap-4 py-4 ">
-                  <div className="flex items-center">
-                    <span className="block text-sm text-gray-400">
-                      {image.timestamp}
-                    </span>
-                  </div>
-                  <h3 className="font-wa-headline text-xl">{image.title}</h3>
-                  <p className="text-gray-500"> {image.names.join(", ")}</p>
-                </div>
-              </a>
+                <h3 className="font-wa-headline text-xl">{image.title}</h3>
+                <p className="text-gray-500"> {image.names.join(", ")}</p>
+              </div>
             </li>
           ))}
       </ul>

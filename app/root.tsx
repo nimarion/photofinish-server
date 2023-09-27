@@ -7,7 +7,6 @@ import {
   Scripts,
   ScrollRestoration,
   isRouteErrorResponse,
-  useMatches,
   useRouteError,
 } from "@remix-run/react";
 import tailwind from "~/tailwind.css";
@@ -23,10 +22,6 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
-  const matches = useMatches();
-
-  const includeScripts = matches.some((match) => match.handle?.hydrate);
-
   return (
     <html lang="de">
       <head>
@@ -44,7 +39,7 @@ export default function App() {
         </div>
         <Footer />
         <ScrollRestoration />
-        {includeScripts ? <Scripts /> : null}
+        <Scripts />
         <LiveReload />
       </body>
     </html>
