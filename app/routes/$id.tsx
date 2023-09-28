@@ -39,25 +39,25 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
       const url = "/images/" + competitionId + "/" + file;
       const title = output.ObjectName || "";
       const timestamp = output.Headline || 0;
-      const athletes = await csv({
+      const csvData = await csv({
         delimiter: ";",
-      })
-        .fromString(output.Caption)
-        .then((jsonObj) => {
-          return jsonObj
-            .map((item) => {
-              return{
-                firstname: item.FirstName,
-                lastname: item.LastName,
-                rank: item.Rank,
-                time: item.Time,
-              }
-            })
-            .filter((item) => {
-              return item.rank != "";
-            });
+      }).fromString(output.Caption);
+      const athletes = csvData
+        .filter((item) => item.Rank != "")
+        .map((item) => {
+          return {
+            firstname: item.FirstName,
+            lastname: item.LastName,
+            rank: item.Rank,
+            time: item.Time,
+            reactionTime: item.React.Time || null,
+          };
         });
-      return { title, timestamp, url, athletes };
+      const windData = csvData.find(
+        (item) => item.Rank == "" && item.Windspeed != ""
+      );
+      const wind = windData ? windData.Windspeed : null;
+      return { title, timestamp, url, athletes, wind };
     })
   );
   const title = competitionId.slice(0, -9);
@@ -66,7 +66,23 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export default function Index() {
   const { title, images } = useLoaderData<typeof loader>();
-  const [image, setImage] = React.useState({ url: "", title: "", athletes: []} as { url: string, title: string, athletes: {firstname: string, lastname: string, rank: string, time: string}[]});
+  const [image, setImage] = React.useState({
+    url: "",
+    title: "",
+    athletes: [],
+    wind: null,
+  } as {
+    url: string;
+    title: string;
+    wind: string | null;
+    athletes: {
+      firstname: string;
+      lastname: string;
+      rank: string;
+      time: string;
+      reactionTime: string | null;
+    }[];
+  });
   const [open, setOpen] = React.useState(false);
   useEffect(() => {
     if (open) {
@@ -90,21 +106,38 @@ export default function Index() {
             />
           </div>
           <div className="flex flex-col gap-2 lg:w-1/3">
-            <h3 className="font-wa-headline text-xl text-center">{image.title}</h3>
+            <h3 className="font-wa-headline text-xl text-center">
+              {image.title}
+            </h3>
+            {image.wind && (
+              <div className="flex flex-row gap-2">
+                <span className="text-lg">Wind: {image.wind}</span>
+              </div>
+            )}
             <table className="table-auto">
               <thead>
                 <tr>
                   <th className="px-4 py-2">Rank</th>
                   <th className="px-4 py-2">Name</th>
                   <th className="px-4 py-2">Time</th>
+                  {image.athletes.filter((athlete) => athlete.reactionTime)
+                    .length > 0 && <th className="px-4 py-2">Reaction Time</th>}
                 </tr>
               </thead>
               <tbody>
                 {image.athletes.map((athlete, key) => (
                   <tr key={key}>
                     <td className="border px-4 py-2">{athlete.rank}</td>
-                    <td className="border px-4 py-2">{athlete.firstname} {athlete.lastname}</td>
+                    <td className="border px-4 py-2">
+                      {athlete.firstname} {athlete.lastname}
+                    </td>
                     <td className="border px-4 py-2">{athlete.time}</td>
+
+                    {athlete.reactionTime && (
+                      <td className="border px-4 py-2">
+                        {athlete.reactionTime}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -127,6 +160,7 @@ export default function Index() {
                   url: image.url,
                   title: image.title,
                   athletes: image.athletes,
+                  wind: image.wind,
                 });
                 setOpen(true);
               }}
