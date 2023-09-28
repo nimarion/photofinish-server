@@ -39,20 +39,25 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
       const url = "/images/" + competitionId + "/" + file;
       const title = output.ObjectName || "";
       const timestamp = output.Headline || 0;
-      const names = await csv({
+      const athletes = await csv({
         delimiter: ";",
       })
         .fromString(output.Caption)
         .then((jsonObj) => {
           return jsonObj
             .map((item) => {
-              return item.FirstName + " " + item.LastName;
+              return{
+                firstname: item.FirstName,
+                lastname: item.LastName,
+                rank: item.Rank,
+                time: item.Time,
+              }
             })
             .filter((item) => {
-              return item.trim() != "";
+              return item.rank != "";
             });
         });
-      return { title, timestamp, url, names };
+      return { title, timestamp, url, athletes };
     })
   );
   const title = competitionId.slice(0, -9);
@@ -61,7 +66,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export default function Index() {
   const { title, images } = useLoaderData<typeof loader>();
-  const [image, setImage] = React.useState({ url: "", title: "", names: [""] });
+  const [image, setImage] = React.useState({ url: "", title: "", athletes: []} as { url: string, title: string, athletes: {firstname: string, lastname: string, rank: string, time: string}[]});
   const [open, setOpen] = React.useState(false);
   useEffect(() => {
     if (open) {
@@ -74,15 +79,37 @@ export default function Index() {
     <ContentContainer>
       <Title>{title}</Title>
       <ReactModal isOpen={open} onRequestClose={() => setOpen(false)}>
-        <img
-          src={image.url}
-          width={1920}
-          height={1080}
-          alt={image.title}
-          className="w-full rounded-t-md"
-        />
-        <div className="ml-4 flex flex-1 flex-col justify-between gap-4 py-4 ">
-          <h3 className="font-wa-headline text-xl">{image.title}</h3>
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className="md:w-2/3">
+            <img
+              src={image.url}
+              width={1920}
+              height={1080}
+              alt={image.title}
+              className="w-full rounded-t-md"
+            />
+          </div>
+          <div className="flex flex-col gap-2 md:w-1/3">
+            <h3 className="font-wa-headline text-xl text-center">{image.title}</h3>
+            <table className="table-auto">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2">Rank</th>
+                  <th className="px-4 py-2">Name</th>
+                  <th className="px-4 py-2">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {image.athletes.map((athlete, key) => (
+                  <tr key={key}>
+                    <td className="border px-4 py-2">{athlete.rank}</td>
+                    <td className="border px-4 py-2">{athlete.firstname} {athlete.lastname}</td>
+                    <td className="border px-4 py-2">{athlete.time}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </ReactModal>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -99,7 +126,7 @@ export default function Index() {
                 setImage({
                   url: image.url,
                   title: image.title,
-                  names: image.names,
+                  athletes: image.athletes,
                 });
                 setOpen(true);
               }}
@@ -125,7 +152,6 @@ export default function Index() {
                   </span>
                 </div>
                 <h3 className="font-wa-headline text-xl">{image.title}</h3>
-                <p className="text-gray-500"> {image.names.join(", ")}</p>
               </div>
             </li>
           ))}
