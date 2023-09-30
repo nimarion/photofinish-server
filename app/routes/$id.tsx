@@ -9,6 +9,7 @@ import Title from "~/components/Title";
 import csv from "csvtojson";
 import ReactModal from "react-modal";
 import React, { useEffect } from "react";
+import ImageCard from "~/components/card/ImageHard";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const IMAGE_FOLDER = path.join(process.cwd(), "public", "images");
@@ -148,12 +149,23 @@ export default function Index() {
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {images
           .filter((image) => image.title != "")
-          .sort((a, b) =>
-            a.timestamp < b.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0
-          )
+          .sort((a, b) => {
+            if (a.timestamp === 0 && b.timestamp === 0) {
+              return 0;
+            } else if (a.timestamp === 0) {
+              return 1;
+            } else if (b.timestamp === 0) {
+              return -1;
+            } else {
+              return a.timestamp > b.timestamp
+                ? 1
+                : b.timestamp > a.timestamp
+                ? -1
+                : 0;
+            }
+          })
           .map((image, key) => (
             <li
-              className="rounded-md bg-white flex flex-col"
               key={key}
               onClick={() => {
                 setImage({
@@ -165,28 +177,30 @@ export default function Index() {
                 setOpen(true);
               }}
             >
-              <div className="aspect-h-9 aspect-w-16">
-                <img
-                  src={image.url}
-                  width={1920}
-                  height={1080}
-                  alt={image.title}
-                  className="w-full rounded-t-md"
-                />
-              </div>
-              <div className="ml-4 flex flex-1 flex-col justify-between gap-4 py-4 ">
-                <div className="flex items-center">
-                  <span className="block text-sm text-gray-400">
-                    {new Date(
-                      `1970-01-01T${image.timestamp}Z`
-                    ).toLocaleTimeString("de-DE", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
+              <ImageCard
+                image={{
+                  height: 1080,
+                  width: 1920,
+                  src: image.url,
+                  alt: image.title,
+                }}
+              >
+                <div className="ml-4 flex flex-1 flex-col justify-between gap-4 py-4 ">
+                  <div className="flex items-center">
+                    <span className="block text-sm text-gray-400">
+                      {image.timestamp === 0
+                        ? "-"
+                        : new Date(
+                            `1970-01-01T${image.timestamp}Z`
+                          ).toLocaleTimeString("de-DE", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                    </span>
+                  </div>
+                  <h3 className="font-wa-headline text-xl">{image.title}</h3>
                 </div>
-                <h3 className="font-wa-headline text-xl">{image.title}</h3>
-              </div>
+              </ImageCard>
             </li>
           ))}
       </ul>

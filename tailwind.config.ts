@@ -8,7 +8,7 @@ export default {
         'tourLightOrange': '#ff8040',
         'tourDarkBlue': '#293847',
         'tourOrange': '#fa4517',
-        'tourRed': 'd12630'
+        'tourRed': '#d12630'
       },
       fontFamily: {
         'wa-bold': ['wa-bold'],
@@ -17,6 +17,11 @@ export default {
       },
     },
   },
-  plugins: [],
+  corePlugins: {
+    aspectRatio: false,
+  },
+  plugins: [
+    require('@tailwindcss/aspect-ratio'),
+  ],
 } satisfies Config
 
