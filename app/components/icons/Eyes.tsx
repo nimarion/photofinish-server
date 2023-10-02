@@ -8,6 +8,7 @@ const Eyes = (props: any) => (
     xmlSpace="preserve"
     {...props}
   >
+    <title>Currently watching</title>
     <path
       style={{
         fill: "#fafafa",
