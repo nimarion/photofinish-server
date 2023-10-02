@@ -15,6 +15,11 @@ import Navbar from "./components/NavBar";
 import Footer from "./components/Footer";
 import Title from "./components/Title";
 import ContentContainer from "./components/ContentContainer";
+import { useEffect, useState  } from "react";
+import { connect } from "./services/ws.client";
+import { wsContext } from "./ws-context";
+
+import type { Socket } from "socket.io-client";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: tailwind },
@@ -22,6 +27,16 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
+  let [socket, setSocket] =
+    useState<Socket<any, any>>();
+
+  useEffect(() => {
+    let connection = connect();
+    setSocket(connection);
+    return () => {
+      connection.close();
+    };
+  }, []);
   return (
     <html lang="de">
       <head>
@@ -35,7 +50,9 @@ export default function App() {
       >
         <Navbar />
         <div className="flex-grow">
-          <Outlet />
+          <wsContext.Provider value={socket}>
+            <Outlet />
+          </wsContext.Provider>
         </div>
         <Footer />
         <ScrollRestoration />

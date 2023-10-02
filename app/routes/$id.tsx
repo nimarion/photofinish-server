@@ -3,13 +3,15 @@ import path from "path";
 import exifr from "exifr";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useParams } from "@remix-run/react";
 import ContentContainer from "~/components/ContentContainer";
 import Title from "~/components/Title";
 import csv from "csvtojson";
 import ReactModal from "react-modal";
-import React, { useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ImageCard from "~/components/card/ImageHard";
+import { wsContext } from "~/ws-context";
+import Eyes from "~/components/icons/Eyes";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const IMAGE_FOLDER = path.join(process.cwd(), "public", "images");
@@ -28,6 +30,9 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   }
   const files = fs
     .readdirSync(path.join(IMAGE_FOLDER, competitionId))
+    .filter((file) => {
+      return file.endsWith(".jpg") || file.endsWith(".jpeg");
+    })
     .filter((file) => {
       return file != "thumbnail.jpg";
     });
@@ -66,7 +71,28 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 };
 
 export default function Index() {
+  const id = useParams().id as string;
   const { title, images } = useLoaderData<typeof loader>();
+  const [watchers, setWatchers] = useState(0);
+  let socket = useContext(wsContext);
+  useEffect(() => {
+    if (!socket) return;
+    socket.emit("joinRoom", id);
+    socket.on("imageChange", (image: string) => {
+      window.location.reload();
+    });
+    socket.on("watchers", (watchers: number) => {
+      if (!watchers) return;
+      if (isNaN(watchers)) return;
+      setWatchers(watchers);
+    });
+    return () => {
+      if (!socket) return;
+      socket.off("imageChange");
+      socket.emit("leaveRoom", id);
+    };
+  }, [socket, id]);
+
   const [image, setImage] = React.useState({
     url: "",
     title: "",
@@ -95,6 +121,15 @@ export default function Index() {
   return (
     <ContentContainer>
       <Title>{title}</Title>
+      {
+        watchers > 0 && (
+          <div className="flex flex-row items-center gap-2">
+          <span className="text-base text-gray-400 items-center">{watchers}</span>
+          <Eyes className="w-6 h-6 mb-0.5" />
+        </div>
+        )
+      }
+     
       <ReactModal isOpen={open} onRequestClose={() => setOpen(false)}>
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-2/3">
