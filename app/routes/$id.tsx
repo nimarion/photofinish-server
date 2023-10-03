@@ -59,14 +59,31 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     }) as Image[];
 
   const title = competitionId.slice(0, -9);
-  return json({ title: title === "MTG" ?  "MTG: Offene Vereinsmeisterschaften": title, images: images.filter((image) => image != null) });
+  const events = [
+    ...new Set(
+      images
+        .map((image) => {
+          if (image.event) {
+            return image.event.event;
+          }
+          return null;
+        })
+        .filter((event) => event != null)
+    ),
+  ] as string[];
+  return json({
+    title: title === "MTG" ? "MTG: Offene Vereinsmeisterschaften" : title,
+    images: images.filter((image) => image != null),
+    events,
+  });
 };
 
 export default function Index() {
   const id = useParams().id as string;
-  const { title, images } = useLoaderData<typeof loader>();
+  const { title, images, events } = useLoaderData<typeof loader>();
   const [watchers, setWatchers] = useState(1);
   const [sorting, setSorting] = useState<"newest" | "oldest">("newest");
+  const [event, setEvent] = useState<string>("");
   const sortedImages = sorting === "newest" ? [...images].reverse() : images;
 
   let socket = useContext(wsContext);
@@ -105,7 +122,21 @@ export default function Index() {
           </span>
           <Eyes className="w-6 h-6 mb-0.5" />
         </div>
-        <div>
+        <div className="flex flex-row gap-2">
+          <select
+            value={event}
+            onChange={(e) => {
+              setEvent(e.target.value);
+            }}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            <option value="">All Events</option>
+            {events.map((event, key) => (
+              <option key={key} value={event}>
+                {event}
+              </option>
+            ))}
+          </select>
           <select
             onChange={(e) => {
               setSorting(e.target.value as "newest" | "oldest");
@@ -113,8 +144,8 @@ export default function Index() {
             value={sorting}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
           </select>
         </div>
       </div>
@@ -140,42 +171,50 @@ export default function Index() {
                   <span className="text-lg">Wind: {image.windSpeed}</span>
                 </div>
               )}
-              <table className="table-auto">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2">Rank</th>
-                    <th className="px-4 py-2">Name</th>
-                    <th className="px-4 py-2">Time</th>
-                    {image.athletes.filter((athlete) => athlete.reactionTime)
-                      .length > 0 && (
-                      <th className="px-4 py-2">Reaction Time</th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {image.athletes.map((athlete, key) => (
-                    <tr key={key}>
-                      <td className="border px-4 py-2">{athlete.rank}</td>
-                      <td className="border px-4 py-2">
-                        {athlete.firstname} {athlete.lastname}
-                      </td>
-                      <td className="border px-4 py-2">{athlete.time}</td>
-
-                      {athlete.reactionTime && (
-                        <td className="border px-4 py-2">
-                          {athlete.reactionTime}
-                        </td>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="text-left">
+                    <tr>
+                      <th className="px-4 py-2">Rank</th>
+                      {image.event && image.event.distance <= 400 && (
+                        <th className="px-4 py-2">Lane</th>
+                      )}
+                      <th className="px-4 py-2">Name</th>
+                      <th className="px-4 py-2">Time</th>
+                      {image.athletes.filter((athlete) => athlete.reactionTime)
+                        .length > 0 && (
+                        <th className="px-4 py-2">Reaction Time</th>
                       )}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {image.athletes.map((athlete, key) => (
+                      <tr key={key}>
+                        <td className="border px-4 py-2">{athlete.rank}</td>
+                        {image.event && image.event.distance <= 400 && (
+                          <td className="border px-4 py-2">{athlete.lane}</td>
+                        )}
+                        <td className="border px-4 py-2">
+                          {athlete.firstname} {athlete.lastname}
+                        </td>
+                        <td className="border px-4 py-2">{athlete.time}</td>
+
+                        {athlete.reactionTime && (
+                          <td className="border px-4 py-2">
+                            {athlete.reactionTime}
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
       </ReactModal>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sortedImages.map((image, key) => (
+        {sortedImages.filter((image) => event == "" ? true : image.event && image.event.event == event).map((image, key) => (
           <li
             key={key}
             onClick={() => {
