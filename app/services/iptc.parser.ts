@@ -21,9 +21,9 @@ const captionSchema = z.object({
 type CaptionEntry = z.infer<typeof captionSchema>;
 
 const iptcSchema = z.object({
-  Headline: z.string().min(1),
-  Caption: z.string().min(1),
-  ObjectName: z.string().min(1),
+  Headline: z.string(), // Time of start
+  Caption: z.string().min(1), // Results, Reaction time, Wind speed as csv
+  ObjectName: z.string().min(1), // Title
 });
 
 export async function parseIptcFromFile(file: string): Promise<Image | null> {
@@ -42,7 +42,7 @@ export async function parseIptcFromFile(file: string): Promise<Image | null> {
     filename: path.parse(file).base,
     title,
     timestamp:
-      timestamp == "0" ? 0 : new Date(`1970-01-01T${timestamp}Z`).getTime(),
+      timestamp == "" || timestamp == "0" ? 0 : new Date(`1970-01-01T${timestamp}Z`).getTime(),
     athletes,
     windSpeed,
   };

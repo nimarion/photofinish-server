@@ -1,12 +1,20 @@
 # Photofinish Server
 
-Listet live alle Photofinish übersichtlich auf einer Webseite auf. JPG Dateien werden aus dem Ordner public/images geladen und auf ITPC Daten geprüft welche von der Omega Photofinish Software gesetzt werden können. Für dieses Projekt muss der Laufname in das ObjectName Feld geschrieben werden und die Startzeit in das Headline Feld. Die dafür angepasst Datei [pictureTags.iptc](pictureTags.iptc) muss zur Nutzung in den Ordner C:\OSV-Star\Template gelegt werden.  
+PhotoFinish Server is a platform designed for real-time publishing of photofinish images to the public. This system utilizes embedded metadata within the images to provide viewers with comprehensive information, including race results, reaction times, and windspeed, all seamlessly integrated with the image.
 
-![OSV Settings](docs/osv_settings.png)
+[Live Demo](https://photofinish.lcrehlingen.de/58.%20Pfingstsportfest_28052023)
 
-Das Verzeichnis für den Export sollte entsprechend angepasst werden damit die Bilder von nextjs gefunden werden können. 
+## Built with 
 
+- [Remix](https://github.com/remix-run/remix) 
+- [Exifr](https://github.com/MikeKovarik/exifr) 
+- [Chokidar](https://github.com/paulmillr/chokidar) 
+- [socket.io](https://github.com/socketio/socket.io) 
 
-![Overview](docs/overview_page.png)
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
-![Competition](docs/competition_page.png)
+<p align="center">
+  <img alt="Haha yes " width="250px" src="https://i.imgur.com/5bXJeZt.png">
+  <br>
+</p>

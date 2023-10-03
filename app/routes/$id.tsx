@@ -6,7 +6,7 @@ import { useLoaderData, useParams } from "@remix-run/react";
 import ContentContainer from "~/components/ContentContainer";
 import Title from "~/components/Title";
 import ReactModal from "react-modal";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ImageCard from "~/components/card/ImageHard";
 import { wsContext } from "~/ws-context";
 import Eyes from "~/components/icons/Eyes";
@@ -15,13 +15,7 @@ import type { Image } from "~/types";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const IMAGE_FOLDER = path.join(process.cwd(), "public", "images");
-  const competitionId = params.id;
-  if (!competitionId) {
-    throw new Response(null, {
-      status: 404,
-      statusText: "Not Found",
-    });
-  }
+  const competitionId = params.id as string;
   if (!fs.existsSync(path.join(IMAGE_FOLDER, competitionId))) {
     throw new Response(null, {
       status: 404,
@@ -65,7 +59,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     }) as Image[];
 
   const title = competitionId.slice(0, -9);
-  return json({ title, images: images.filter((image) => image != null) });
+  return json({ title: title === "MTG" ?  "MTG: Offene Vereinsmeisterschaften": title, images: images.filter((image) => image != null) });
 };
 
 export default function Index() {
