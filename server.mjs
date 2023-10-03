@@ -18,21 +18,27 @@ const io = new Server(server);
 io.on('connection', (socket) => {
   socket.on('joinRoom', (room) => {
     socket.join(room);
-    const socketIoRoom =  io.sockets.adapter.rooms.get(room);
-    if(socketIoRoom) {
+    const socketIoRoom = io.sockets.adapter.rooms.get(room);
+    if (socketIoRoom) {
       io.to(room).emit('watchers', socketIoRoom.size);
     }
   });
 
   socket.on('leaveRoom', (room) => {
     socket.leave(room);
-    const socketIoRoom =  io.sockets.adapter.rooms.get(room);
-    if(socketIoRoom) {
+    const socketIoRoom = io.sockets.adapter.rooms.get(room);
+    if (socketIoRoom) {
       io.to(room).emit('watchers', socketIoRoom.size);
     }
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnecting', () => {
+    socket.rooms.forEach(room => {
+      const socketIoRoom = io.sockets.adapter.rooms.get(room);
+      if (socketIoRoom) {
+        io.to(room).emit('watchers', socketIoRoom.size - 1);
+      }
+    });
   });
 });
 
