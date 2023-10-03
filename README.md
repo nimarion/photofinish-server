@@ -4,6 +4,12 @@ PhotoFinish Server is a platform designed for real-time publishing of photofinis
 
 [Live Demo](https://photofinish.lcrehlingen.de/58.%20Pfingstsportfest_28052023)
 
+
+
+https://github.com/nimarion/photofinish-server/assets/23435250/8ebed7b6-94c4-4cac-a394-074de40bcdb6
+
+
+
 ## Built with 
 
 - [Remix](https://github.com/remix-run/remix) 
