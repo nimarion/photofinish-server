@@ -44,6 +44,7 @@ export async function parseIptcFromFile(file: string): Promise<Image | null> {
   const event = getEventFromTitle(title);
   return {
     filename: path.parse(file).base,
+    competition: path.basename(path.dirname(file)),
     title,
     timestamp:
       timestamp == "" || timestamp == "0"
@@ -126,10 +127,10 @@ export function getEventFromTitle(title: string): Event | null {
       };
     }
     const distance = Number(event.replace("m", ""));
-    if(isHurdlesEvent(title)) {
+    if (isHurdlesEvent(title)) {
       event += "H";
     }
-    if(isSteeplechaseEvent(title)) {
+    if (isSteeplechaseEvent(title)) {
       event += "SC";
     }
     return {

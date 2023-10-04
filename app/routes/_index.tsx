@@ -1,10 +1,9 @@
 import { json } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import fs from "fs";
 import path from "path";
 import ContentContainer from "~/components/ContentContainer";
-import fallbackThumbnail from "~/assets/fallbackThumbnail.jpg";
-import ImageCard from "~/components/card/ImageHard";
+import CompetitionCard from "~/components/card/CompetitionCard";
 
 export const loader = async () => {
   const IMAGE_FOLDER = path.join(process.cwd(), "public", "images");
@@ -17,7 +16,7 @@ export const loader = async () => {
       const hasThumbnail = fs.existsSync(
         path.join(IMAGE_FOLDER, folder, "thumbnail.jpg")
       );
-      const thumbnail = "/images/" + folder + "/thumbnail.jpg";
+      const thumbnail = "/" + folder + "/thumbnail.jpg";
       const id = folder;
       const name = folder.slice(0, -9);
       const dateString = folder.slice(-8);
@@ -27,7 +26,7 @@ export const loader = async () => {
       const date = new Date(year, month, day).getTime() / 1000;
       return {
         id,
-        name: name === "MTG" ? "MTG: Offene Vereinsmeisterschaften": name,
+        name: name === "MTG" ? "MTG: Offene Vereinsmeisterschaften" : name,
         date,
         thumbnail: hasThumbnail ? thumbnail : undefined,
       };
@@ -43,34 +42,7 @@ export default function Index() {
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {competitions.map((competition, key) => (
           <li key={key}>
-            <Link to={`/${competition.id}`}>
-              <ImageCard
-                image={{
-                  height: 1080,
-                  width: 1920,
-                  src: competition.thumbnail || fallbackThumbnail,
-                  alt: competition.name,
-                }}
-              >
-                <div className="ml-4 flex flex-1 flex-col justify-between gap-4 py-4 ">
-                  <div className="flex items-center">
-                    <span className="block text-sm text-gray-400">
-                      {new Date(competition.date * 1000).toLocaleDateString(
-                        "de-DE",
-                        {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        }
-                      )}
-                    </span>
-                  </div>
-                  <h3 className="font-wa-headline text-xl">
-                    {competition.name}
-                  </h3>
-                </div>
-              </ImageCard>
-            </Link>
+            <CompetitionCard {...competition} id={competition.id} />
           </li>
         ))}
       </ul>

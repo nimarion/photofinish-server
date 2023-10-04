@@ -5,13 +5,13 @@ import { json } from "@remix-run/node";
 import { useLoaderData, useParams } from "@remix-run/react";
 import ContentContainer from "~/components/ContentContainer";
 import Title from "~/components/Title";
-import ReactModal from "react-modal";
 import { useContext, useEffect, useState } from "react";
-import ImageCard from "~/components/card/ImageHard";
 import { wsContext } from "~/ws-context";
 import Eyes from "~/components/icons/Eyes";
 import { parseIptcFromFile } from "~/services/iptc.parser";
-import type { Image } from "~/types";
+import type { Image as ImageType } from "~/types";
+import PhotofinishModal from "~/components/PhotofinishModal";
+import PhotofinishCard from "~/components/card/PhotofinishCard";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const IMAGE_FOLDER = path.join(process.cwd(), "public", "images");
@@ -56,7 +56,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
           ? -1
           : 0;
       }
-    }) as Image[];
+    }) as ImageType[];
 
   const title = competitionId.slice(0, -9);
   const events = [
@@ -104,7 +104,7 @@ export default function Index() {
     };
   }, [socket, id]);
 
-  const [image, setImage] = useState<Image | null>(null);
+  const [image, setImage] = useState<ImageType | null>(null);
   useEffect(() => {
     if (image) {
       document.body.style.overflow = "hidden";
@@ -150,101 +150,24 @@ export default function Index() {
         </div>
       </div>
 
-      <ReactModal isOpen={image != null} onRequestClose={() => setImage(null)}>
-        {image && (
-          <div className="flex flex-col lg:flex-row gap-8">
-            <div className="lg:w-2/3">
-              <img
-                src={`/images/${id}/${image.filename}`}
-                width={1920}
-                height={1080}
-                alt={image.title}
-                className="w-full rounded-t-md"
-              />
-            </div>
-            <div className="flex flex-col gap-2 lg:w-1/3">
-              <h3 className="font-wa-headline text-xl text-center">
-                {image.title}
-              </h3>
-              {image.windSpeed && (
-                <div className="flex flex-row gap-2">
-                  <span className="text-lg">Wind: {image.windSpeed}</span>
-                </div>
-              )}
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="text-left">
-                    <tr>
-                      <th className="px-4 py-2">Rank</th>
-                      {image.event && image.event.distance <= 400 && (
-                        <th className="px-4 py-2">Lane</th>
-                      )}
-                      <th className="px-4 py-2">Name</th>
-                      <th className="px-4 py-2">Time</th>
-                      {image.athletes.filter((athlete) => athlete.reactionTime)
-                        .length > 0 && (
-                        <th className="px-4 py-2">Reaction Time</th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {image.athletes.map((athlete, key) => (
-                      <tr key={key}>
-                        <td className="border px-4 py-2">{athlete.rank}</td>
-                        {image.event && image.event.distance <= 400 && (
-                          <td className="border px-4 py-2">{athlete.lane}</td>
-                        )}
-                        <td className="border px-4 py-2">
-                          {athlete.firstname} {athlete.lastname}
-                        </td>
-                        <td className="border px-4 py-2">{athlete.time}</td>
-
-                        {athlete.reactionTime && (
-                          <td className="border px-4 py-2">
-                            {athlete.reactionTime}
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-      </ReactModal>
+      {image && (
+        <PhotofinishModal image={image} onClose={() => setImage(null)} />
+      )}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sortedImages.filter((image) => event == "" ? true : image.event && image.event.event == event).map((image, key) => (
-          <li
-            key={key}
-            onClick={() => {
-              setImage(image);
-            }}
-          >
-            <ImageCard
-              image={{
-                height: 1080,
-                width: 1920,
-                src: `/images/${id}/${image.filename}`,
-                alt: image.title,
+        {sortedImages
+          .filter((image) =>
+            event == "" ? true : image.event && image.event.event == event
+          )
+          .map((image, key) => (
+            <li
+              key={key}
+              onClick={() => {
+                setImage(image);
               }}
             >
-              <div className="ml-4 flex flex-1 flex-col justify-between gap-4 py-4 ">
-                <div className="flex items-center">
-                  <span className="block text-sm text-gray-400">
-                    {image.timestamp
-                      ? new Date(image.timestamp).toLocaleTimeString("de-DE", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : "-"}
-                  </span>
-                </div>
-                <h3 className="font-wa-headline text-xl">{image.title}</h3>
-              </div>
-            </ImageCard>
-          </li>
-        ))}
+              <PhotofinishCard image={image} />
+            </li>
+          ))}
       </ul>
     </ContentContainer>
   );

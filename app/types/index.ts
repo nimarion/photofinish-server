@@ -16,6 +16,7 @@ export interface Event {
 }
 
 export interface Image {
+  competition: string;
   filename: string;
   title: string;
   timestamp: number;
