@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="py-8 px-4 2xl:px-0 bg-tourDarkBlue text-white bottom-0 w-full">
+    <footer className="py-8 px-4 2xl:px-0 text-white bottom-0 w-full">
       <div className="mx-auto max-w-screen-xl">
         <hr className="my-6 border-gray-200 sm:mx-auto lg:my-8" />
         <div className="flex flex-wrap justify-between gap-4">

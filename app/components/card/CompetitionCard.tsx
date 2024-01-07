@@ -1,7 +1,7 @@
 import fallbackThumbnail from "~/assets/fallbackThumbnail.jpg";
 import Image from "../Image";
 import ImageCard from "./ImageCard";
-import { Link } from "@remix-run/react";
+import { Link, useSearchParams } from "@remix-run/react";
 
 interface CompetitionCardProps {
   id: string;
@@ -16,8 +16,9 @@ export default function CompetitionCard({
   date,
   thumbnail,
 }: CompetitionCardProps) {
+  const [searchParams] = useSearchParams();
   return (
-    <Link to={`/${id}`}>
+    <Link to={`/${id}?${searchParams.toString()}`} className="block">
       <ImageCard
         image={
           thumbnail ? (

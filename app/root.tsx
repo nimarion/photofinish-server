@@ -8,6 +8,7 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   useRouteError,
+  useSearchParams,
 } from "@remix-run/react";
 import tailwind from "~/tailwind.css";
 import fonts from "~/fonts.css";
@@ -15,7 +16,7 @@ import Navbar from "./components/NavBar";
 import Footer from "./components/Footer";
 import Title from "./components/Title";
 import ContentContainer from "./components/ContentContainer";
-import { useEffect, useState  } from "react";
+import { useEffect, useState } from "react";
 import { connect } from "./services/ws.client";
 import { wsContext } from "./ws-context";
 
@@ -27,8 +28,9 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
-  let [socket, setSocket] =
-    useState<Socket<any, any>>();
+  const [searchParams] = useSearchParams();
+  const iframe = searchParams.has("iframe");
+  let [socket, setSocket] = useState<Socket<any, any>>();
 
   useEffect(() => {
     let connection = connect();
@@ -46,15 +48,17 @@ export default function App() {
         <Links />
       </head>
       <body
-        className={`flex min-h-screen flex-col font-wa-regular bg-tourDarkBlue`}
+        className={`flex min-h-screen flex-col font-wa-regular ${
+          iframe ? "bg-transparent" : "bg-tourDarkBlue"
+        }`}
       >
-        <Navbar />
+        {!iframe && <Navbar />}
         <div className="flex-grow">
           <wsContext.Provider value={socket}>
             <Outlet />
           </wsContext.Provider>
         </div>
-        <Footer />
+        {!iframe && <Footer />}
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
