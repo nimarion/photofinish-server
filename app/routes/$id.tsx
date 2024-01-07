@@ -72,7 +72,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     ),
   ] as string[];
   return json({
-    title: title === "MTG" ? "MTG: Offene Vereinsmeisterschaften" : title,
+    title: title === "MTG" ? "MTG: Hallensportfest" : title,
     images: images.filter((image) => image != null),
     events,
   });

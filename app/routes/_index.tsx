@@ -26,7 +26,7 @@ export const loader = async () => {
       const date = new Date(year, month, day).getTime() / 1000;
       return {
         id,
-        name: name === "MTG" ? "MTG: Offene Vereinsmeisterschaften" : name,
+        name: name === "MTG" ? "MTG Hallensportfest" : name,
         date,
         thumbnail: hasThumbnail ? thumbnail : undefined,
       };
