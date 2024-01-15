@@ -49,7 +49,7 @@ export async function parseIptcFromFile(file: string): Promise<Image | null> {
     timestamp:
       timestamp == "" || timestamp == "0"
         ? 0
-        : new Date(`1970-01-01T${timestamp}Z`).getTime(),
+        : new Date(`1970-01-01T${timestamp}Z`).getTime() - 3600000,
     athletes,
     windSpeed,
     event,
