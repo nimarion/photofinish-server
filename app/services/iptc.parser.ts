@@ -99,7 +99,12 @@ export function getAthletesFromCaption(
         rank: Number(item.Rank),
         lane: Number(item.Lane),
         bib: Number(item.Bib),
-        nationality: item.Nat,
+        nationality:
+          item.Nat.length == 0
+            ? null
+            : item.Nat.split("|").length > 1
+            ? item.Nat.split("|")[1].trim()
+            : item.Nat.trim(),
         firstname: item.FirstName,
         lastname: item.LastName,
         time: item.Time,

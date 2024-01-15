@@ -5,7 +5,7 @@ export interface Athlete {
   time: string;
   bib: number;
   lane: number;
-  nationality: string;
+  nationality: string | null;
   reactionTime: string | null;
 }
 

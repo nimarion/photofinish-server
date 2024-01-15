@@ -56,7 +56,8 @@ export default function PhotofinishModal({
                         <td className="border px-4 py-2">{athlete.lane}</td>
                       )}
                       <td className="border px-4 py-2">
-                        {athlete.firstname} {athlete.lastname}
+                        {athlete.firstname} {athlete.lastname}{" "}
+                        {athlete.nationality && `(${athlete.nationality.trim()})`}
                       </td>
                       <td className="border px-4 py-2">{athlete.time}</td>
 

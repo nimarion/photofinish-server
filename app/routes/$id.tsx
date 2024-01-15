@@ -12,6 +12,7 @@ import { parseIptcFromFile } from "~/services/iptc.parser";
 import type { Image as ImageType } from "~/types";
 import PhotofinishModal from "~/components/PhotofinishModal";
 import PhotofinishCard from "~/components/card/PhotofinishCard";
+import Camera from "~/components/icons/Camera";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const IMAGE_FOLDER = path.join(process.cwd(), "public", "images");
@@ -116,12 +117,21 @@ export default function Index() {
     <ContentContainer>
       <Title>{title}</Title>
       <div className="flex flex-row justify-between">
-        <div className="flex flex-row items-center gap-2">
-          <span className="text-base text-gray-400 items-center">
-            {watchers}
-          </span>
-          <Eyes className="w-6 h-6 mb-0.5" />
+        <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row  gap-2">
+            <span className="text-base text-gray-400 items-center">
+              {images.length}
+            </span>
+            <Camera className="w-6 h-6 pb-1" />
+          </div>
+          <div className="flex flex-row gap-2">
+            <span className="text-base text-gray-400 items-center">
+              {watchers}
+            </span>
+            <Eyes className="w-6 h-6 pb-0.5" />
+          </div>
         </div>
+
         <div className="flex flex-row gap-2">
           <select
             value={event}
