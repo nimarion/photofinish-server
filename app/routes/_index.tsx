@@ -16,7 +16,7 @@ export const loader = async () => {
       const hasThumbnail = fs.existsSync(
         path.join(IMAGE_FOLDER, folder, "thumbnail.jpg")
       );
-      const thumbnail = "/" + folder + "/thumbnail.jpg";
+      const thumbnail = "/public/images/" + folder + "/thumbnail.jpg";
       const id = folder;
       const name = folder.slice(0, -9);
       const dateString = folder.slice(-8);

@@ -8,7 +8,12 @@ import http from "http";
 
 // notice that the result of `remix build` is "just a module"
 import * as build from "./build/index.js";
-import { createIPX, createIPXMiddleware } from "ipx";
+import {
+  createIPX,
+  ipxFSStorage,
+  ipxHttpStorage,
+  createIPXNodeServer,
+} from "ipx";
 
 const pathSeperator = path.sep;
 
@@ -54,10 +59,10 @@ chokidar.watch("public/images").on("all", (event, path) => {
 });
 
 const ipx = createIPX({
-  dir: "public/images",
+  storage: ipxFSStorage("./public/images"),
 });
 
-app.use("/_ipx",  createIPXMiddleware(ipx));
+app.use("/_ipx",  createIPXNodeServer(ipx));
 app.use(express.static("public"));
 
 // and your app is "just a request handler"

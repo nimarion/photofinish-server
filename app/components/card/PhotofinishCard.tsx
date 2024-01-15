@@ -7,7 +7,7 @@ export default function PhotofinishCard({ image }: { image: ImageType }) {
     <ImageCard
       image={
         <Image
-          src={`/${image.competition}/${image.filename}`}
+          src={`/public/images/${image.competition}/${image.filename}`}
           alt={image.title}
           width={1920}
           height={1080}
