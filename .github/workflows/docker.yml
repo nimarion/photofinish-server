@@ -3,6 +3,8 @@ name: 🚀 Deploy
 on:
   workflow_dispatch:
   push:
+    paths:
+      - backend/**
     branches:
       - develop
       - main
