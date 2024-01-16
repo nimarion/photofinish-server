@@ -3,17 +3,20 @@ import CompetitionCard from "@/components/card/CompetitionCard";
 import { axios } from "@/lib/axios";
 import { Event } from "@/types";
 import { useState } from "react";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useSearchParams } from "react-router-dom";
 
 export const Loader = async () => {
   return (await axios.get("/events")) as Event[];
 };
 export default function Index() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const events = useLoaderData() as Event[];
   const availableLocations = [
     ...new Set(events.map((event) => event.location)),
   ];
-  const [location, setLocation] = useState<string>("");
+  const [location, setLocation] = useState<string>(
+    searchParams.has("location") ? searchParams.get("location")! : ""
+  );
   return (
     <ContentContainer>
       <div className="flex flex-row justify-between">
@@ -22,6 +25,13 @@ export default function Index() {
             value={location}
             onChange={(e) => {
               setLocation(e.target.value);
+              const params = new URLSearchParams(searchParams);
+              if (e.target.value != "") {
+                params.set("location", e.target.value);
+              } else {
+                params.delete("location");
+              }
+              setSearchParams(params);
             }}
             className="w-max bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >

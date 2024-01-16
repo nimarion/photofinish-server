@@ -8,7 +8,7 @@ import { axios } from "@/lib/axios";
 import { wsContext } from "@/provider/ws-context";
 import { Event, Image } from "@/types";
 import { useContext, useEffect, useState } from "react";
-import { useLoaderData, useParams } from "react-router-dom";
+import { useLoaderData, useParams, useSearchParams } from "react-router-dom";
 
 export const Loader = async ({ params }: { params: { event: string } }) => {
   const { event } = params;
@@ -37,6 +37,7 @@ export const Loader = async ({ params }: { params: { event: string } }) => {
 };
 
 export default function EventPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const data = useLoaderData() as {
     event: Event;
     images: Image[];
@@ -46,8 +47,8 @@ export default function EventPage() {
   const [images, setImages] = useState<Image[]>(data.images);
   const eventId = useParams().event;
   const [watchers, setWatchers] = useState(1);
-  const [trackEvent, setTrackEvent] = useState<string>("");
-  const [sorting, setSorting] = useState<"newest" | "oldest">("newest");
+  const [trackEvent, setTrackEvent] = useState<string>(searchParams.has("trackEvent") ? searchParams.get("trackEvent")! : "");
+  const [sorting, setSorting] = useState<"newest" | "oldest">(searchParams.has("sorting") ? searchParams.get("sorting")! as "newest" | "oldest" : "newest");
   const sortedImages = sorting === "newest" ? [...images].reverse() : images;
   const [image, setImage] = useState<Image | null>(null);
   const socket = useContext(wsContext);
@@ -84,6 +85,15 @@ export default function EventPage() {
       socket.emit("leaveEvent", eventId);
     };
   }, [socket, eventId]);
+
+  useEffect(() => {
+    if (image) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [image]);
+
   return (
     <ContentContainer>
       <div className="flex flex-col gap-2">
@@ -118,6 +128,13 @@ export default function EventPage() {
             value={trackEvent}
             onChange={(e) => {
               setTrackEvent(e.target.value);
+              const params = new URLSearchParams(searchParams);
+              if (e.target.value != "") {
+                params.set("trackEvent", e.target.value);
+              } else {
+                params.delete("trackEvent");
+              }
+              setSearchParams(params);
             }}
             className="w-max bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
@@ -131,6 +148,13 @@ export default function EventPage() {
           <select
             onChange={(e) => {
               setSorting(e.target.value as "newest" | "oldest");
+              const params = new URLSearchParams(searchParams);
+              if (e.target.value != "") {
+                params.set("sorting", e.target.value);
+              } else {
+                params.delete("sorting");
+              }
+              setSearchParams(params);
             }}
             value={sorting}
             className="w-max bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
