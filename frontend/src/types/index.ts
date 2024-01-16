@@ -27,6 +27,7 @@ export interface Event {
   date: string;
   id: string;
   name: string;
+  location: string;
   /** @format date-time */
   updatedAt: string;
 }

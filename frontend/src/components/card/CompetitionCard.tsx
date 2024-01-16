@@ -3,7 +3,7 @@ import Image from "../Image";
 import ImageCard from "./ImageCard";
 import { Event } from "@/types";
 
-export default function CompetitionCard({ id, date, name}: Event) {
+export default function CompetitionCard({ id, date, name, location }: Event) {
   const [searchParams] = useSearchParams();
   return (
     <Link to={`/${id}?${searchParams.toString()}`} className="block">
@@ -24,7 +24,7 @@ export default function CompetitionCard({ id, date, name}: Event) {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric",
-              })}
+              })} - { location}
             </span>
           </div>
           <h3 className="font-wa-headline text-xl">{name}</h3>

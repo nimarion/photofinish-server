@@ -20,6 +20,9 @@ export class Event {
   @Expose()
   @Type(() => Date)
   date: Date;
+  @ApiProperty()
+  @Expose()
+  location: string;
 
   constructor(event: Event) {
     Object.assign(this, event);

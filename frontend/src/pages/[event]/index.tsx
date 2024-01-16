@@ -15,7 +15,7 @@ export const Loader = async ({ params }: { params: { event: string } }) => {
   const eventData = (await axios.get(`/events/${event}`)) as Event;
   const images = (await axios.get(`/events/${event}/images`)) as Image[];
   if (!eventData) {
-    return null;
+    throw new Response("Event not found", { status: 404 });
   }
   const trackEvents = [
     ...new Set(
@@ -71,7 +71,7 @@ export default function EventPage() {
         })
       );
     });
-    
+
     socket.on("image.deleted", (data: any) => {
       const { filename } = data;
       setImages((images) => images.filter((i) => i.filename != filename));
@@ -86,7 +86,17 @@ export default function EventPage() {
   }, [socket, eventId]);
   return (
     <ContentContainer>
-      <Title>{event.name}</Title>
+      <div className="flex flex-col gap-2">
+        <Title>{event.name}</Title>
+        <h2 className="text-xl font-bold text-white text-center">
+          {new Date(event.date).toLocaleDateString("de-DE", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })}{" "}
+          - {event.location}
+        </h2>
+      </div>
       <div className="flex flex-row justify-between">
         <div className="flex flex-row items-center gap-4">
           <div className="flex flex-row  gap-2">
@@ -109,9 +119,9 @@ export default function EventPage() {
             onChange={(e) => {
               setTrackEvent(e.target.value);
             }}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="w-max bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
-            <option value="">All Events</option>
+            <option value="">Alle Disziplinen</option>
             {trackEvents.map((trackEvent, key) => (
               <option key={key} value={trackEvent}>
                 {trackEvent}
@@ -123,10 +133,10 @@ export default function EventPage() {
               setSorting(e.target.value as "newest" | "oldest");
             }}
             value={sorting}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="w-max bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
+            <option value="newest">Neuste</option>
+            <option value="oldest">Älteste</option>
           </select>
         </div>
       </div>
@@ -152,6 +162,13 @@ export default function EventPage() {
             </li>
           ))}
       </ul>
+      {images.length == 0 && (
+        <div className="flex flex-col items-center justify-center h-full">
+          <h2 className="text-3xl font-bold text-white text-center">
+            Noch keine Zielbilder vorhanden
+          </h2>
+        </div>
+      )}
     </ContentContainer>
   );
 }
