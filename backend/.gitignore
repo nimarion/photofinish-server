@@ -36,4 +36,5 @@ lerna-debug.log*
 
 .env
 dev.db
+dev.db-journal
 /images
