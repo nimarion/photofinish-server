@@ -19,7 +19,14 @@ export class ImagesService {
 
   fileWatcher() {
     chokidar
-      .watch(`${baseFolder}/*/*.{jpeg,jpg}`, { ignoreInitial: true })
+      .watch(`${baseFolder}/*/*.{jpeg,jpg}`, {
+        ignoreInitial: false,
+        ignored: (path) => {
+          return (
+            path.endsWith('thumbnail.jpg') || path.endsWith('thumbnail.jpeg')
+          );
+        },
+      })
       .on('all', async (fileevent, filepath) => {
         if (filepath.endsWith('.jpg') || filepath.endsWith('.jpeg')) {
           const folders = filepath.split(path.sep);
@@ -28,15 +35,14 @@ export class ImagesService {
           const imageFile = folders[folders.length - 1];
           switch (fileevent) {
             case 'add':
-              const image = await this.findOne(eventId, imageFile);
               const imageCreatedEvent: ImageCreatedEvent = {
-                image,
+                image: await this.findOne(eventId, imageFile),
               };
               this.eventEmitter.emit('image.created', imageCreatedEvent);
               break;
             case 'change':
               const imageUpdatedEvent: ImageUpdatedEvent = {
-                image,
+                image: await this.findOne(eventId, imageFile),
               };
               this.eventEmitter.emit('image.updated', imageUpdatedEvent);
               break;

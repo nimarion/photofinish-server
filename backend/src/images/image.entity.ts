@@ -13,6 +13,8 @@ export class Image {
   @ApiProperty()
   eventId: string;
   @ApiProperty()
+  lastModified: Date;
+  @ApiProperty()
   filename: string;
   @ApiProperty()
   title: string;

@@ -31,18 +31,20 @@ const iptcSchema = z.object({
 
 export async function parseIptcFromFile(file: string): Promise<Image | null> {
   const data = fs.readFileSync(file);
+  const lastModified = fs.statSync(file).mtime;
   const iptc = await exifr.parse(data, { iptc: true });
   const valitatedIptc = await iptcSchema.safeParseAsync(iptc);
   if (!valitatedIptc.success) {
     return null;
   }
   const parsedCaption = await parseIptcCaption(valitatedIptc.data.Caption);
-  const title = valitatedIptc.data.ObjectName;
+  const title = valitatedIptc.data.ObjectName.trim();
   const timestamp = valitatedIptc.data.Headline;
   const windSpeed = getWindSpeedFromCaption(parsedCaption);
   const athletes = getAthletesFromCaption(parsedCaption);
   const event = getEventFromTitle(title);
   return {
+    lastModified,
     filename: path.parse(file).base,
     eventId: path.basename(path.dirname(file)),
     title,

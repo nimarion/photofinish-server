@@ -5,7 +5,6 @@ import {
   OnGatewayConnection,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { LiveService } from './live.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ImageCreatedEvent } from 'src/images/events/image-created.event';
 import { ImageDeletedEvent } from 'src/images/events/image-deleted.event';
@@ -19,8 +18,6 @@ import { ImageUpdatedEvent } from 'src/images/events/image-updated.event';
 export class LiveGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
-
-  constructor(private readonly liveService: LiveService) {}
 
   async handleConnection(client: Socket) {
     client.on('disconnecting', () => {

@@ -37,11 +37,13 @@ export const Loader = async ({ params }: { params: { event: string } }) => {
 };
 
 export default function EventPage() {
-  const { event, images, trackEvents } = useLoaderData() as {
+  const data = useLoaderData() as {
     event: Event;
     images: Image[];
     trackEvents: string[];
   };
+  const { event, trackEvents } = data;
+  const [images, setImages] = useState<Image[]>(data.images);
   const eventId = useParams().event;
   const [watchers, setWatchers] = useState(1);
   const [trackEvent, setTrackEvent] = useState<string>("");
@@ -56,9 +58,29 @@ export default function EventPage() {
       if (!watchers || isNaN(watchers)) return;
       setWatchers(watchers);
     });
+    socket.on("image.created", (image: Image) => {
+      setImages((images) => [...images, image]);
+    });
+    socket.on("image.updated", (image: Image) => {
+      setImages((images) =>
+        images.map((i) => {
+          if (i.filename == image.filename) {
+            return image;
+          }
+          return i;
+        })
+      );
+    });
+    
+    socket.on("image.deleted", (data: any) => {
+      const { filename } = data;
+      setImages((images) => images.filter((i) => i.filename != filename));
+    });
     return () => {
       if (!socket) return;
-      socket.off("imageChange");
+      socket.off("image.created");
+      socket.off("image.updated");
+      socket.off("image.deleted");
       socket.emit("leaveEvent", eventId);
     };
   }, [socket, eventId]);
