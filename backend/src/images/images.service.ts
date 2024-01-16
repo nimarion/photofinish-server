@@ -55,6 +55,9 @@ export class ImagesService {
   }
 
   async findAll(eventId: string) {
+    if (fs.existsSync(baseFolder + '/' + eventId) == false) {
+      return [];
+    }
     const files = fs
       .readdirSync(path.join(baseFolder, eventId))
       .filter((file) => {

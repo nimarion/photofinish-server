@@ -8,6 +8,8 @@ import { EventsService } from './events/events.service';
 import { LiveModule } from './live/live.module';
 import { createIPX, ipxFSStorage, createIPXNodeServer } from 'ipx';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -15,6 +17,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ImagesModule,
     LiveModule,
     EventEmitterModule.forRoot(),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'images'),
+    }),
   ],
   controllers: [AppController],
   providers: [PrismaService, EventsService],

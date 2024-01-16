@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as exifr from 'exifr';
 import * as csv from 'csvtojson';
 import * as path from 'path';
-import { Athlete, Event, Image } from './image.entity';
+import { Athlete, TrackEvent, Image } from './image.entity';
 
 const captionSchema = z.object({
   FirstName: z.string(),
@@ -113,7 +113,7 @@ export function getAthletesFromCaption(
     });
 }
 
-export function getEventFromTitle(title: string): Event | null {
+export function getEventFromTitle(title: string): TrackEvent | null {
   const regex = /(\d+\s?x?\d+\s?m)/g;
   const matches = title.match(regex);
   if (matches) {
