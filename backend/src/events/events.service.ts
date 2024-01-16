@@ -8,7 +8,11 @@ export class EventsService {
 
   findAll() {
     return this.prisma.event
-      .findMany()
+      .findMany({
+        orderBy: {
+          date: 'desc',
+        },
+      })
       .then((events) => events.map((event) => new Event(event)));
   }
 
