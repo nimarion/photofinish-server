@@ -8,8 +8,8 @@ import Running from "@/components/icons/Running";
 import { axios } from "@/lib/axios";
 import { wsContext } from "@/provider/ws-context";
 import { Event, Image } from "@/types";
-import { useContext, useEffect, useState } from "react";
-import { useLoaderData, useParams, useSearchParams } from "react-router-dom";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { useLoaderData, useParams } from "react-router-dom";
 
 export const Loader = async ({ params }: { params: { event: string } }) => {
   const { event } = params;
@@ -40,7 +40,6 @@ export const Loader = async ({ params }: { params: { event: string } }) => {
 };
 
 export default function EventPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const data = useLoaderData() as {
     event: Event;
     images: Image[];
@@ -50,16 +49,9 @@ export default function EventPage() {
   const [images, setImages] = useState<Image[]>(data.images);
   const eventId = useParams().event;
   const [watchers, setWatchers] = useState(1);
-  const [trackEvent, setTrackEvent] = useState<string>(
-    searchParams.has("trackEvent") ? searchParams.get("trackEvent")! : ""
-  );
+  const [trackEvent, setTrackEvent] = useState<string>("");
   const [athlete, setAthlete] = useState<string>("");
-  const [sorting, setSorting] = useState<"newest" | "oldest">(
-    searchParams.has("sorting")
-      ? (searchParams.get("sorting")! as "newest" | "oldest")
-      : "newest"
-  );
-  const sortedImages = sorting === "newest" ? [...images].reverse() : images;
+  const [sorting, setSorting] = useState<"newest" | "oldest">("newest");
   const [image, setImage] = useState<Image | null>(null);
   const socket = useContext(wsContext);
   useEffect(() => {
@@ -104,21 +96,34 @@ export default function EventPage() {
     }
   }, [image]);
 
-  const [athletes, setAthletes] = useState<
-    {
-      firstname: string;
-      lastname: string;
-      nationality: string;
-    }[]
-  >([]);
-  useEffect(() => {
+  const filteredImages = useMemo(() => {
+    const sortedImages = sorting === "newest" ? [...images].reverse() : images
+    return sortedImages
+      .filter((image) =>
+        trackEvent == ""
+          ? true
+          : image.event && image.event.event == trackEvent
+      )
+      .filter((image) => {
+        if (athlete == "") return true;
+        const [firstname, lastname] = athlete.split(" --- ");
+        return image.athletes.some(
+          (athlete) =>
+            athlete.firstname == firstname && athlete.lastname == lastname
+        );
+      });
+  }, [sorting, trackEvent, athlete, images]);
+
+  const athletes = useMemo(() => {
     const athletes = [] as {
       firstname: string;
       lastname: string;
       nationality: string;
     }[];
-    images.forEach((image) => {
+    filteredImages.forEach((image) => {
       image.athletes.forEach((athlete) => {
+        // firstname is empty for relay events
+        // relay name in lastname
         if (athlete.firstname.length == 0 || athlete.lastname.length == 0)
           return;
         const existingAthlete = athletes.find(
@@ -143,8 +148,25 @@ export default function EventPage() {
       }
       return 0;
     });
-    setAthletes(athletes);
-  }, [images]);
+    return athletes;
+  }, [filteredImages]);
+
+  // Check if athlete is still in images of selected track event
+  // if check is not performed, athlete is still in state but not in select options and no images are shown
+  useEffect(() => {
+    if(athlete == "") return;
+    const [firstname, lastname] = athlete.split(" --- ");
+    const images = filteredImages.filter((image) =>
+      image.athletes.some(
+        (athlete) =>
+          athlete.firstname == firstname && athlete.lastname == lastname
+      )
+    );
+    if(images.length == 0){
+      setAthlete("");
+    }
+  }, [trackEvent, filteredImages, athlete]);
+ 
 
   return (
     <ContentContainer>
@@ -186,13 +208,6 @@ export default function EventPage() {
             value={trackEvent}
             onChange={(e) => {
               setTrackEvent(e.target.value);
-              const params = new URLSearchParams(searchParams);
-              if (e.target.value != "") {
-                params.set("trackEvent", e.target.value);
-              } else {
-                params.delete("trackEvent");
-              }
-              setSearchParams(params);
             }}
             className="w-max bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
@@ -206,13 +221,6 @@ export default function EventPage() {
           <select
             onChange={(e) => {
               setSorting(e.target.value as "newest" | "oldest");
-              const params = new URLSearchParams(searchParams);
-              if (e.target.value != "") {
-                params.set("sorting", e.target.value);
-              } else {
-                params.delete("sorting");
-              }
-              setSearchParams(params);
             }}
             value={sorting}
             className="w-max bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -243,19 +251,7 @@ export default function EventPage() {
         <PhotofinishModal image={image} onClose={() => setImage(null)} />
       )}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sortedImages
-          .filter((image) =>
-            trackEvent == ""
-              ? true
-              : image.event && image.event.event == trackEvent
-          ).filter((image) => {
-            if (athlete == "") return true;
-            const [firstname, lastname] = athlete.split(" --- ");
-            return image.athletes.some(
-              (athlete) =>
-                athlete.firstname == firstname && athlete.lastname == lastname
-            );
-          })
+        {filteredImages
           .map((image, key) => (
             <li
               key={key}
