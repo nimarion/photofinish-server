@@ -8,6 +8,7 @@ const Camera = (props: any) => (
     xmlSpace="preserve"
     {...props}
   >
+    <title>Zielbilder</title>
     <path
       d="M25.24 39.27H12.99c-1.63 0-2.95-1.32-2.95-2.95V29.1c0-1.63 1.32-2.95 2.95-2.95h12.25c1.63 0 2.95 1.32 2.95 2.95v7.22a2.962 2.962 0 0 1-2.95 2.95z"
       fill="#90a4ae"

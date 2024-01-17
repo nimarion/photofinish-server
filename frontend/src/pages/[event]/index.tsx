@@ -4,6 +4,7 @@ import Title from "@/components/Title";
 import PhotofinishCard from "@/components/card/PhotofinishCard";
 import Camera from "@/components/icons/Camera";
 import Eyes from "@/components/icons/Eyes";
+import Running from "@/components/icons/Running";
 import { axios } from "@/lib/axios";
 import { wsContext } from "@/provider/ws-context";
 import { Event, Image } from "@/types";
@@ -12,8 +13,10 @@ import { useLoaderData, useParams, useSearchParams } from "react-router-dom";
 
 export const Loader = async ({ params }: { params: { event: string } }) => {
   const { event } = params;
-  const eventData = (await axios.get(`/events/${event}`)) as Event;
-  const images = (await axios.get(`/events/${event}/images`)) as Image[];
+  const [eventData, images] = await Promise.all([
+    axios.get(`/events/${event}`) as Promise<Event>,
+    axios.get(`/events/${event}/images`) as Promise<Image[]>,
+  ]);
   if (!eventData) {
     throw new Response("Event not found", { status: 404 });
   }
@@ -47,8 +50,15 @@ export default function EventPage() {
   const [images, setImages] = useState<Image[]>(data.images);
   const eventId = useParams().event;
   const [watchers, setWatchers] = useState(1);
-  const [trackEvent, setTrackEvent] = useState<string>(searchParams.has("trackEvent") ? searchParams.get("trackEvent")! : "");
-  const [sorting, setSorting] = useState<"newest" | "oldest">(searchParams.has("sorting") ? searchParams.get("sorting")! as "newest" | "oldest" : "newest");
+  const [trackEvent, setTrackEvent] = useState<string>(
+    searchParams.has("trackEvent") ? searchParams.get("trackEvent")! : ""
+  );
+  const [athlete, setAthlete] = useState<string>("");
+  const [sorting, setSorting] = useState<"newest" | "oldest">(
+    searchParams.has("sorting")
+      ? (searchParams.get("sorting")! as "newest" | "oldest")
+      : "newest"
+  );
   const sortedImages = sorting === "newest" ? [...images].reverse() : images;
   const [image, setImage] = useState<Image | null>(null);
   const socket = useContext(wsContext);
@@ -73,7 +83,7 @@ export default function EventPage() {
       );
     });
 
-    socket.on("image.deleted", (data: any) => {
+    socket.on("image.deleted", (data: { filename: string }) => {
       const { filename } = data;
       setImages((images) => images.filter((i) => i.filename != filename));
     });
@@ -94,6 +104,48 @@ export default function EventPage() {
     }
   }, [image]);
 
+  const [athletes, setAthletes] = useState<
+    {
+      firstname: string;
+      lastname: string;
+      nationality: string;
+    }[]
+  >([]);
+  useEffect(() => {
+    const athletes = [] as {
+      firstname: string;
+      lastname: string;
+      nationality: string;
+    }[];
+    images.forEach((image) => {
+      image.athletes.forEach((athlete) => {
+        if (athlete.firstname.length == 0 || athlete.lastname.length == 0)
+          return;
+        const existingAthlete = athletes.find(
+          (a) =>
+            a.firstname === athlete.firstname && a.lastname === athlete.lastname
+        );
+        if (existingAthlete) return;
+        athletes.push({
+          firstname: athlete.firstname,
+          lastname: athlete.lastname,
+          nationality: athlete.nationality,
+        });
+      });
+    });
+    // sort by firstname
+    athletes.sort((a, b) => {
+      if (a.firstname < b.firstname) {
+        return -1;
+      }
+      if (a.firstname > b.firstname) {
+        return 1;
+      }
+      return 0;
+    });
+    setAthletes(athletes);
+  }, [images]);
+
   return (
     <ContentContainer>
       <div className="flex flex-col gap-2">
@@ -107,13 +159,19 @@ export default function EventPage() {
           - {event.location}
         </h2>
       </div>
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-col md:flex-row justify-between gap-4 ">
         <div className="flex flex-row items-center gap-4">
           <div className="flex flex-row  gap-2">
             <span className="text-base text-gray-400 items-center">
               {images.length}
             </span>
             <Camera className="w-6 h-6 pb-1" />
+          </div>
+          <div className="flex flex-row  gap-2">
+            <span className="text-base text-gray-400 items-center">
+              {athletes.length}
+            </span>
+            <Running className="w-6 h-6 pb-1" />
           </div>
           <div className="flex flex-row gap-2">
             <span className="text-base text-gray-400 items-center">
@@ -162,6 +220,22 @@ export default function EventPage() {
             <option value="newest">Neuste</option>
             <option value="oldest">Älteste</option>
           </select>
+          <select
+            onChange={(e) => {
+              setAthlete(e.target.value);
+            }}
+            className="w-max bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            <option value="">Alle Athleten</option>
+            {athletes.map((athlete, key) => (
+              <option
+                key={key}
+                value={`${athlete.firstname} --- ${athlete.lastname}`}
+              >
+                {athlete.firstname} {athlete.lastname}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -174,7 +248,14 @@ export default function EventPage() {
             trackEvent == ""
               ? true
               : image.event && image.event.event == trackEvent
-          )
+          ).filter((image) => {
+            if (athlete == "") return true;
+            const [firstname, lastname] = athlete.split(" --- ");
+            return image.athletes.some(
+              (athlete) =>
+                athlete.firstname == firstname && athlete.lastname == lastname
+            );
+          })
           .map((image, key) => (
             <li
               key={key}
