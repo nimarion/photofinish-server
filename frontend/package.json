@@ -14,6 +14,7 @@
   "dependencies": {
     "@generouted/react-router": "^1.17.1",
     "axios": "^1.6.5",
+    "qrcode": "^1.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-modal": "^3.16.1",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/node": "^20.11.4",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@types/react-modal": "^3.16.3",

@@ -1,9 +1,11 @@
 import ContentContainer from "@/components/ContentContainer";
 import PhotofinishModal from "@/components/PhotofinishModal";
+import QRC from "@/components/QRModal";
 import Title from "@/components/Title";
 import PhotofinishCard from "@/components/card/PhotofinishCard";
 import Camera from "@/components/icons/Camera";
 import Eyes from "@/components/icons/Eyes";
+import QRCode from "@/components/icons/QRCode";
 import Running from "@/components/icons/Running";
 import { axios } from "@/lib/axios";
 import { wsContext } from "@/provider/ws-context";
@@ -47,6 +49,7 @@ export default function EventPage() {
   };
   const { event, trackEvents } = data;
   const [images, setImages] = useState<Image[]>(data.images);
+  const [qrModal, setQrModal] = useState(false);
   const eventId = useParams().event;
   const [watchers, setWatchers] = useState(1);
   const [trackEvent, setTrackEvent] = useState<string>("");
@@ -97,12 +100,10 @@ export default function EventPage() {
   }, [image]);
 
   const filteredImages = useMemo(() => {
-    const sortedImages = sorting === "newest" ? [...images].reverse() : images
+    const sortedImages = sorting === "newest" ? [...images].reverse() : images;
     return sortedImages
       .filter((image) =>
-        trackEvent == ""
-          ? true
-          : image.event && image.event.event == trackEvent
+        trackEvent == "" ? true : image.event && image.event.event == trackEvent
       )
       .filter((image) => {
         if (athlete == "") return true;
@@ -154,7 +155,7 @@ export default function EventPage() {
   // Check if athlete is still in images of selected track event
   // if check is not performed, athlete is still in state but not in select options and no images are shown
   useEffect(() => {
-    if(athlete == "") return;
+    if (athlete == "") return;
     const [firstname, lastname] = athlete.split(" --- ");
     const images = filteredImages.filter((image) =>
       image.athletes.some(
@@ -162,11 +163,10 @@ export default function EventPage() {
           athlete.firstname == firstname && athlete.lastname == lastname
       )
     );
-    if(images.length == 0){
+    if (images.length == 0) {
       setAthlete("");
     }
   }, [trackEvent, filteredImages, athlete]);
- 
 
   return (
     <ContentContainer>
@@ -181,6 +181,7 @@ export default function EventPage() {
           - {event.location}
         </h2>
       </div>
+
       <div className="flex flex-col md:flex-row justify-between gap-4 ">
         <div className="flex flex-row items-center gap-4">
           <div className="flex flex-row  gap-2">
@@ -203,7 +204,13 @@ export default function EventPage() {
           </div>
         </div>
 
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2 items-center">
+          <button onClick={() => setQrModal(true)}>
+            <QRCode className="w-9 h-9 pb-1" />
+          </button>
+          {
+            qrModal && <QRC url={`${window.location.href}`} onClose={() => setQrModal(false)} />
+          }
           <select
             value={trackEvent}
             onChange={(e) => {
@@ -251,17 +258,16 @@ export default function EventPage() {
         <PhotofinishModal image={image} onClose={() => setImage(null)} />
       )}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredImages
-          .map((image, key) => (
-            <li
-              key={key}
-              onClick={() => {
-                setImage(image);
-              }}
-            >
-              <PhotofinishCard image={image} />
-            </li>
-          ))}
+        {filteredImages.map((image, key) => (
+          <li
+            key={key}
+            onClick={() => {
+              setImage(image);
+            }}
+          >
+            <PhotofinishCard image={image} />
+          </li>
+        ))}
       </ul>
       {images.length == 0 && (
         <div className="flex flex-col items-center justify-center h-full">
