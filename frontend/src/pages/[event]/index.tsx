@@ -7,11 +7,12 @@ import Camera from "@/components/icons/Camera";
 import Eyes from "@/components/icons/Eyes";
 import QRCode from "@/components/icons/QRCode";
 import Running from "@/components/icons/Running";
+import { PHOTOFINISH_API_URL } from "@/config";
 import { axios } from "@/lib/axios";
 import { wsContext } from "@/provider/ws-context";
 import { Event, Image } from "@/types";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useLoaderData, useParams } from "react-router-dom";
+import { useLoaderData, useParams, useSearchParams } from "react-router-dom";
 
 export const Loader = async ({ params }: { params: { event: string } }) => {
   const { event } = params;
@@ -47,6 +48,8 @@ export default function EventPage() {
     images: Image[];
     trackEvents: string[];
   };
+  const [searchParams] = useSearchParams();
+  const streamMode = searchParams.has("stream");
   const { event, trackEvents } = data;
   const [images, setImages] = useState<Image[]>(data.images);
   const [qrModal, setQrModal] = useState(false);
@@ -168,6 +171,14 @@ export default function EventPage() {
     }
   }, [trackEvent, filteredImages, athlete]);
 
+  if(streamMode){
+    const lastImage = images[images.length - 1];
+    if(!lastImage) return null;
+    return (
+      <img src={`${PHOTOFINISH_API_URL}/${lastImage.eventId}/${lastImage.filename}`} className="w-full h-full object-cover" />
+    )
+  }
+
   return (
     <ContentContainer>
       <div className="flex flex-col gap-2">
@@ -208,9 +219,12 @@ export default function EventPage() {
           <button onClick={() => setQrModal(true)}>
             <QRCode className="w-9 h-9 pb-1" />
           </button>
-          {
-            qrModal && <QRC url={`${window.location.href}`} onClose={() => setQrModal(false)} />
-          }
+          {qrModal && (
+            <QRC
+              url={`${window.location.href}`}
+              onClose={() => setQrModal(false)}
+            />
+          )}
           <select
             value={trackEvent}
             onChange={(e) => {
