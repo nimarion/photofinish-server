@@ -1,7 +1,8 @@
 import { Link, useSearchParams } from "react-router-dom";
-import Image from "../Image";
 import ImageCard from "./ImageCard";
 import { Event } from "@/types";
+import { Image } from "@unpic/react";
+import { IPX_URL } from "@/config";
 
 export default function CompetitionCard({ id, date, name, location }: Event) {
   const [searchParams] = useSearchParams();
@@ -10,7 +11,8 @@ export default function CompetitionCard({ id, date, name, location }: Event) {
       <ImageCard
         image={
           <Image
-            src={`/${id}/thumbnail.jpg`}
+            cdn="ipx"
+            src={`${IPX_URL}/${id}/thumbnail.jpg`}
             alt={name}
             height={1080}
             width={1920}

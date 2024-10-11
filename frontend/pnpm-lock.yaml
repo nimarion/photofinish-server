@@ -11,6 +11,9 @@ importers:
       '@generouted/react-router':
         specifier: ^1.19.6
         version: 1.19.6(react-router-dom@6.27.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(vite@5.4.8(@types/node@22.7.5))
+      '@unpic/react':
+        specifier: ^0.1.14
+        version: 0.1.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       axios:
         specifier: ^1.7.7
         version: 1.7.7
@@ -604,6 +607,19 @@ packages:
   '@typescript-eslint/visitor-keys@6.19.0':
     resolution: {integrity: sha512-hZaUCORLgubBvtGpp1JEFEazcuEdfxta9j4iUwdSAr7mEsYYAp3EAUyCZk3VEEqGj6W+AV4uWyrDGtrlawAsgQ==}
     engines: {node: ^16.0.0 || >=18.0.0}
+
+  '@unpic/core@0.0.49':
+    resolution: {integrity: sha512-tAqeJRMPF2TrZbSQe74OZ9O5DzKDDUoFwFbZUpjvLcgwGQ/8aleDCb2Iy3bHFJfzzYZ9iHN0hN1VpTlAGQd+ZA==}
+
+  '@unpic/react@0.1.14':
+    resolution: {integrity: sha512-jQ2qJkLMDQqQIQ8THf1c9YCMgZVO1JhPltdqteTVF9gjGqzgM81LiCG/VjH+EQiZNT3Lk7bPlf7Sc4h/q3VXAg==}
+    peerDependencies:
+      next: ^13.0.0 || ^14.0.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      next:
+        optional: true
 
   '@vitejs/plugin-react-swc@3.7.1':
     resolution: {integrity: sha512-vgWOY0i1EROUK0Ctg1hwhtC3SdcDjZcdit4Ups4aPkDcB1jYhmo+RMYWY87cmXMhvtD5uf8lV89j2w16vkdSVg==}
@@ -1613,6 +1629,9 @@ packages:
   undici-types@6.19.8:
     resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
 
+  unpic@3.18.0:
+    resolution: {integrity: sha512-JemzuG3nyKpEQ/DArrYM0l+LDSLLPYiUQvDfGXJY35+r0J0C984vPB4Zh8DyMVip102YSnTeZtZ6Q8OQegQDRQ==}
+
   update-browserslist-db@1.1.1:
     resolution: {integrity: sha512-R8UzCaa9Az+38REPiJ1tXlImTJXlVfgHZsglwBD/k6nj76ctsH1E3q4doGrukiLQd3sGQYu56r5+lo5r94l29A==}
     hasBin: true
@@ -2154,6 +2173,16 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 6.19.0
       eslint-visitor-keys: 3.4.3
+
+  '@unpic/core@0.0.49':
+    dependencies:
+      unpic: 3.18.0
+
+  '@unpic/react@0.1.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@unpic/core': 0.0.49
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   '@vitejs/plugin-react-swc@3.7.1(vite@5.4.8(@types/node@22.7.5))':
     dependencies:
@@ -3193,6 +3222,8 @@ snapshots:
   typescript@5.6.3: {}
 
   undici-types@6.19.8: {}
+
+  unpic@3.18.0: {}
 
   update-browserslist-db@1.1.1(browserslist@4.24.0):
     dependencies:

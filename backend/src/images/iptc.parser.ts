@@ -4,6 +4,7 @@ import * as exifr from 'exifr';
 import * as csv from 'csvtojson';
 import * as path from 'path';
 import { Athlete, TrackEvent, Image } from './image.entity';
+import sizeOf from 'image-size';
 
 const captionSchema = z.object({
   FirstName: z.string(),
@@ -43,6 +44,7 @@ export async function parseIptcFromFile(file: string): Promise<Image | null> {
   const windSpeed = getWindSpeedFromCaption(parsedCaption);
   const athletes = getAthletesFromCaption(parsedCaption);
   const event = getEventFromTitle(title);
+  const { width, height } = sizeOf(file);
   return {
     lastModified,
     filename: path.parse(file).base,
@@ -55,6 +57,8 @@ export async function parseIptcFromFile(file: string): Promise<Image | null> {
     athletes,
     windSpeed,
     event,
+    width,
+    height,
   };
 }
 

@@ -1,32 +1,34 @@
-import { PHOTOFINISH_API_URL } from "@/config";
-import { Image } from "@/types";
+import { IPX_URL, PHOTOFINISH_API_URL } from "@/config";
+import { Image as ImageType } from "@/types";
+import { Image } from "@unpic/react";
 import ReactModal from "react-modal";
 
 export default function PhotofinishModal({
   image,
   onClose,
 }: {
-  image: Image;
+  image: ImageType;
   onClose: () => void;
 }) {
-  const { eventId  } = image;
+  const { eventId } = image;
 
   return (
     <ReactModal isOpen={true} onRequestClose={onClose}>
       {image && (
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-2/3">
-            <img
-              src={`${PHOTOFINISH_API_URL}/${eventId}/${image.filename}`}
-              width={1920}
-              height={1080}
+            <Image
+              cdn="ipx"
+              src={`${IPX_URL}/${eventId}/${image.filename}`}
+              width={image.width}
+              height={image.height}
               alt={image.title}
               className="w-full rounded-t-md"
             />
           </div>
           <div className="flex flex-col gap-2 lg:w-1/3">
             <h3 className="font-wa-headline text-xl text-center">
-              {image.title}
+              {`${PHOTOFINISH_API_URL}/_ipx/${eventId}/${image.filename}`}
             </h3>
             {image.windSpeed && (
               <div className="flex flex-row gap-2">
@@ -58,7 +60,8 @@ export default function PhotofinishModal({
                       )}
                       <td className="border px-4 py-2">
                         {athlete.firstname} {athlete.lastname}{" "}
-                        {athlete.nationality && `(${athlete.nationality.trim()})`}
+                        {athlete.nationality &&
+                          `(${athlete.nationality.trim()})`}
                       </td>
                       <td className="border px-4 py-2">{athlete.time}</td>
 

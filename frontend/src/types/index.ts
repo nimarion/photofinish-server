@@ -40,6 +40,8 @@ export interface Image {
   timestamp: number;
   title: string;
   windSpeed: string;
+  width: number;
+  height: number;
 }
 
 export interface TrackEvent {

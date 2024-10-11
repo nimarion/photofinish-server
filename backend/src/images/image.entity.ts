@@ -26,6 +26,10 @@ export class Image {
   event: TrackEvent | null;
   @ApiProperty({ type: () => [Athlete] })
   athletes: Athlete[];
+  @ApiProperty()
+  width: number;
+  @ApiProperty()
+  height: number;
 }
 
 export class Athlete {

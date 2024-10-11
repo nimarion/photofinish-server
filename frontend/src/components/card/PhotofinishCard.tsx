@@ -1,16 +1,18 @@
-import Image from "../Image";
+import { Image } from "@unpic/react";
 import ImageCard from "./ImageCard";
 import { Image as ImageType } from "@/types";
+import { IPX_URL } from "@/config";
 
 export default function PhotofinishCard({ image }: { image: ImageType }) {
   return (
     <ImageCard
       image={
         <Image
-          src={`/${image.eventId}/${image.filename}`}
+          cdn="ipx"
+          src={`${IPX_URL}/${image.eventId}/${image.filename}`}
           alt={image.title}
-          width={1920}
-          height={1080}
+          width={image.width}
+          height={image.height}
         />
       }
     >
