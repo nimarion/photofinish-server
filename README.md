@@ -2,7 +2,7 @@
 
 PhotoFinish Server is a platform designed for real-time publishing of photofinish images to the public. This system utilizes embedded metadata within the images to provide viewers with comprehensive information, including race results, reaction times, and windspeed, all seamlessly integrated with the image.
 
-[Live Demo](https://photofinish.lcrehlingen.de/58.%20Pfingstsportfest_28052023)
+[Live Demo](https://photofinish.lcrehlingen.de/pfingsten2024)
 
 
 

@@ -1,31 +1,21 @@
-FROM node:20.11.0-bullseye-slim AS builder
-
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+COPY . /app
 WORKDIR /app
 
-COPY package*.json ./
-COPY prisma ./prisma/
+FROM base AS prod-deps
+RUN apt-get update -y && apt-get install -y openssl
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-RUN npm install
+FROM base AS build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build
 
-COPY . .
-
-RUN npm run build
-
-FROM node:20.11.0-bullseye-slim
-
-ARG BRANCH="main"
-ARG COMMIT=""
-LABEL branch=${BRANCH}
-LABEL commit=${COMMIT}
-
-ENV COMMIT_SHA=${COMMIT}
-ENV COMMIT_BRANCH=${BRANCH}
-
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-
+FROM base
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=build /app/dist /app/dist
+RUN apt-get update -y && apt-get install -y openssl
 EXPOSE 3000
-
-CMD [  "npm", "run", "start:migrate:prod" ]
+CMD [ "pnpm", "start:migrate:prod" ]
