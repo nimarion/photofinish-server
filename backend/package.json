@@ -24,7 +24,7 @@
     "@nestjs/platform-socket.io": "^10.4.4",
     "@nestjs/serve-static": "^4.0.2",
     "@nestjs/swagger": "^7.4.2",
-    "@nestjs/websockets": "^10.4.4",
+    "@nestjs/websockets": "^10.4.5",
     "@prisma/client": "^5.20.0",
     "chokidar": "^4.0.1",
     "class-transformer": "^0.5.1",
