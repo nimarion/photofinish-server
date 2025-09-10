@@ -40,7 +40,7 @@
     "swagger-typescript-api": "^13.2.1",
     "tailwindcss": "^4.1.10",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^6.3.6"
   },
   "packageManager": "pnpm@10.12.1"
 }
